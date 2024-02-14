@@ -1,22 +1,30 @@
 package middleware
 
 import (
-	"jwt-example-go/config"
 	auth "jwt-example-go/internal/auth/jwt"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
-func AuthMiddleware(cfg *config.Config) gin.HandlerFunc {
+func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenString := c.GetHeader("Authorization")
+		authHeader := c.GetHeader("Authorization")
 
-		if tokenString == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization token not provided"})
+		if authHeader == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header not provided"})
 			c.Abort()
 			return
 		}
+
+		if !strings.HasPrefix(authHeader, "Bearer ") {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Authorization header"})
+			c.Abort()
+			return
+		}
+
+		tokenString := authHeader[7:]
 
 		claims, err := auth.VerifyToken(tokenString)
 		if err != nil {

@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"jwt-example-go/internal/middleware"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,7 +18,7 @@ func RegisterRoutes(router *gin.Engine) {
 	}
 	admin := router.Group("/admin")
 	{
-		admin.GET("/welcome", WelcomeHandler())
+		admin.GET("/welcome", middleware.AuthMiddleware(), WelcomeHandler())
 	}
 
 }
